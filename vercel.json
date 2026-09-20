@@ -1,0 +1,6 @@
+{
+  "crons": [
+    { "path": "/api/cron/expire-jobs", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/weekly-alerts", "schedule": "0 14 * * 1" }
+  ]
+}

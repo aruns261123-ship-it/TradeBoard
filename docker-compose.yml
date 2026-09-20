@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: tradeboard
+      POSTGRES_PASSWORD: tradeboard
+      POSTGRES_DB: tradeboard
+    ports:
+      - "5432:5432"
+    volumes:
+      - tradeboard-pgdata:/var/lib/postgresql/data
+
+volumes:
+  tradeboard-pgdata:
