@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JobCard } from "@/components/job-card";
 import { SubscribeForm } from "@/components/subscribe-form";
-import { TRADES, tradeFromSegment, STATES } from "@/lib/trades";
+import { tradeFromSegment, STATES } from "@/lib/trades";
 import { countLiveByTrade, countLiveByState, listJobs } from "@/lib/data";
 import { APP_NAME } from "@/lib/seo";
 
