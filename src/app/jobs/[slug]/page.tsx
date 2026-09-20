@@ -8,6 +8,7 @@ import { employmentLabel } from "@/lib/trades";
 import { formatSalary } from "@/lib/pricing";
 import { timeAgo } from "@/lib/utils";
 import { escapeJsonLdObject } from "@/lib/sanitize";
+import { ShareButtons } from "@/components/share-buttons";
 import { APP_NAME, appUrl, absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +79,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           <span className="text-sm text-muted-foreground">
             Posted {timeAgo(job.publishedAt ?? job.createdAt)} · {daysLeft} days left
           </span>
+        </div>
+
+        <div className="mt-5 border-t pt-4">
+          <ShareButtons
+            url={absoluteUrl(`/jobs/${job.slug}`)}
+            title={`${job.title} at ${company.name}`}
+          />
         </div>
 
         <div className="prose prose-sm mt-6 max-w-none whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
