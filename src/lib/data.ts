@@ -3,6 +3,23 @@ import { db } from "@/db";
 import { companies, jobs } from "@/db/schema";
 import type { TradeSlug } from "@/lib/trades";
 
+/**
+ * Run a DB query without letting a database outage crash a public page:
+ * on failure, logs the error and returns `fallback` instead of throwing.
+ */
+export async function safeQuery<T>(
+  label: string,
+  fn: () => Promise<T>,
+  fallback: T
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[data:${label}]`, err instanceof Error ? err.message : err);
+    return fallback;
+  }
+}
+
 export type JobWithCompany = {
   job: typeof jobs.$inferSelect;
   company: typeof companies.$inferSelect;

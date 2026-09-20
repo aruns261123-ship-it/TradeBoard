@@ -3,14 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/inputs";
 import { JobCard } from "@/components/job-card";
 import { TRADES, STATES } from "@/lib/trades";
-import { countLiveByTrade, listJobs } from "@/lib/data";
+import { countLiveByTrade, listJobs, safeQuery } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [{ items: latest }, tradeCounts] = await Promise.all([
-    listJobs({ perPage: 6 }),
-    countLiveByTrade(),
+    safeQuery("home:listJobs", () => listJobs({ perPage: 6 }), {
+      items: [],
+      hasMore: false,
+      page: 1,
+      perPage: 6,
+    }),
+    safeQuery("home:countLiveByTrade", countLiveByTrade, new Map<string, number>()),
   ]);
   const totalJobs = [...tradeCounts.values()].reduce((a, b) => a + b, 0);
 

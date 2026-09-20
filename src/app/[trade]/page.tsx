@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { JobCard } from "@/components/job-card";
 import { SubscribeForm } from "@/components/subscribe-form";
 import { tradeFromSegment, STATES } from "@/lib/trades";
-import { countLiveByTrade, countLiveByState, listJobs } from "@/lib/data";
+import { countLiveByTrade, countLiveByState, listJobs, safeQuery } from "@/lib/data";
 import { APP_NAME } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -34,9 +34,14 @@ export default async function TradeHubPage({
   if (!t) notFound();
 
   const [{ items: jobs }, tradeCounts, stateCounts] = await Promise.all([
-    listJobs({ trade: t.slug, perPage: 12 }),
-    countLiveByTrade(),
-    countLiveByState(),
+    safeQuery("tradeHub:listJobs", () => listJobs({ trade: t.slug, perPage: 12 }), {
+      items: [],
+      hasMore: false,
+      page: 1,
+      perPage: 12,
+    }),
+    safeQuery("tradeHub:countLiveByTrade", countLiveByTrade, new Map<string, number>()),
+    safeQuery("tradeHub:countLiveByState", countLiveByState, new Map<string, number>()),
   ]);
 
   const statesWithJobs = STATES.filter((s) => (stateCounts.get(s.code) ?? 0) > 0);

@@ -7,7 +7,7 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { db, client } from "../src/db";
+import { db } from "../src/db";
 import { companies, jobs, promoCodes, users } from "../src/db/schema";
 import { slugify } from "../src/lib/utils";
 import type { TradeSlug } from "../src/lib/trades";
@@ -200,5 +200,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await client.end();
+    await db.$client.end();
   });

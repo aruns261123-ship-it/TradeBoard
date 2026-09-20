@@ -3,7 +3,8 @@ import { auth } from "@/auth";
 import { SignOutButton } from "@/app/dashboard/job-actions";
 
 export async function SiteHeader() {
-  const session = await auth();
+  // Missing AUTH_SECRET or an auth outage must not crash every page.
+  const session = await auth().catch(() => null);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/75">

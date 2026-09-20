@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Input, Select } from "@/components/ui/inputs";
 import { Button } from "@/components/ui/button";
 import { JobCard } from "@/components/job-card";
-import { listJobs, countJobs } from "@/lib/data";
+import { listJobs, countJobs, safeQuery } from "@/lib/data";
 import { TRADES, STATES, employmentLabel } from "@/lib/trades";
 import { APP_NAME } from "@/lib/seo";
 
@@ -33,8 +33,13 @@ export default async function JobsPage({ searchParams }: { searchParams: SP }) {
   };
 
   const [{ items, hasMore, page, perPage }, total] = await Promise.all([
-    listJobs(filters),
-    countJobs(filters),
+    safeQuery("jobs:listJobs", () => listJobs(filters), {
+      items: [],
+      hasMore: false,
+      page: filters.page,
+      perPage: 15,
+    }),
+    safeQuery("jobs:countJobs", () => countJobs(filters), 0),
   ]);
 
   function pageLink(p: number) {

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { JobCard } from "@/components/job-card";
 import { SubscribeForm } from "@/components/subscribe-form";
 import { tradeFromSegment, STATES, stateName } from "@/lib/trades";
-import { listJobs } from "@/lib/data";
+import { listJobs, safeQuery } from "@/lib/data";
 import { APP_NAME } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -44,11 +44,11 @@ export default async function TradeStatePage({
   if (!code) notFound();
   const prettyName = stateName(code);
 
-  const { items: jobs } = await listJobs({
-    trade: t.slug,
-    state: code,
-    perPage: 24,
-  });
+  const { items: jobs } = await safeQuery(
+    "tradeState:listJobs",
+    () => listJobs({ trade: t.slug, state: code, perPage: 24 }),
+    { items: [], hasMore: false, page: 1, perPage: 24 }
+  );
 
   const cities = [...new Set(jobs.map(({ job }) => job.city))].slice(0, 12);
   const otherStates = STATES.filter((s) => s.code !== code).slice(0, 8);
