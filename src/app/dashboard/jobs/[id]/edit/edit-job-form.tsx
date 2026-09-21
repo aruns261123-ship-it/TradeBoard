@@ -41,6 +41,12 @@ export function EditJobForm({ job }: { job: JobData }) {
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [payType, setPayType] = useState<"hourly" | "yearly">(
+    (job.salaryMin !== null && job.salaryMin < 250) ||
+    (job.salaryMax !== null && job.salaryMax < 250)
+      ? "hourly"
+      : "yearly"
+  );
 
   function set(key: string, value: string | boolean) {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -155,42 +161,72 @@ export function EditJobForm({ job }: { job: JobData }) {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div>
-          <Label htmlFor="edit-type">Employment type</Label>
-          <Select
-            id="edit-type"
-            value={formData.employmentType}
-            onChange={(e) => set("employmentType", e.target.value)}
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </Select>
+      <div className="rounded-lg border bg-secondary/30 p-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label className="font-semibold text-foreground">Compensation / Pay Rate</Label>
+          <div className="flex items-center rounded-md border bg-card p-0.5 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setPayType("hourly")}
+              className={`rounded px-2.5 py-1 transition-colors ${
+                payType === "hourly" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Hourly ($/hr)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPayType("yearly")}
+              className={`rounded px-2.5 py-1 transition-colors ${
+                payType === "yearly" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Yearly ($/yr)
+            </button>
+          </div>
         </div>
-        <div>
-          <Label htmlFor="edit-min">Salary min (USD/yr)</Label>
-          <Input
-            id="edit-min"
-            type="number"
-            min={0}
-            value={formData.salaryMin}
-            onChange={(e) => set("salaryMin", e.target.value)}
-            placeholder="55000"
-          />
-        </div>
-        <div>
-          <Label htmlFor="edit-max">Salary max (USD/yr)</Label>
-          <Input
-            id="edit-max"
-            type="number"
-            min={0}
-            value={formData.salaryMax}
-            onChange={(e) => set("salaryMax", e.target.value)}
-            placeholder="85000"
-          />
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="edit-type">Employment type</Label>
+            <Select
+              id="edit-type"
+              value={formData.employmentType}
+              onChange={(e) => set("employmentType", e.target.value)}
+            >
+              {EMPLOYMENT_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="edit-min">
+              {payType === "hourly" ? "Min pay ($/hr)" : "Min salary ($/yr)"}
+            </Label>
+            <Input
+              id="edit-min"
+              type="number"
+              min={0}
+              value={formData.salaryMin}
+              onChange={(e) => set("salaryMin", e.target.value)}
+              placeholder={payType === "hourly" ? "32" : "65000"}
+            />
+          </div>
+          <div>
+            <Label htmlFor="edit-max">
+              {payType === "hourly" ? "Max pay ($/hr)" : "Max salary ($/yr)"}
+            </Label>
+            <Input
+              id="edit-max"
+              type="number"
+              min={0}
+              value={formData.salaryMax}
+              onChange={(e) => set("salaryMax", e.target.value)}
+              placeholder={payType === "hourly" ? "48" : "95000"}
+            />
+          </div>
         </div>
       </div>
 

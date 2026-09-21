@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { timeAgo } from "@/lib/utils";
-import { employmentLabel } from "@/lib/trades";
+import { employmentLabel, extractTradePerks } from "@/lib/trades";
 import { formatSalary } from "@/lib/pricing";
 import { SaveJobButton } from "@/components/save-job-button";
 
@@ -13,6 +13,8 @@ export function JobCard({
   company: typeof import("@/db/schema").companies.$inferSelect;
 }) {
   const salary = formatSalary(job.salaryMin, job.salaryMax);
+  const perks = extractTradePerks(job.description);
+
   return (
     <div
       className={`rounded-lg border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
@@ -49,9 +51,29 @@ export function JobCard({
           <SaveJobButton jobId={job.id} />
         </div>
       </div>
+
+      {perks.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          {perks.map((p) => (
+            <span
+              key={p.id}
+              className="inline-flex items-center gap-1 rounded bg-secondary/80 px-2 py-0.5 text-[11px] font-medium text-foreground"
+            >
+              <span>{p.emoji}</span>
+              <span>{p.label}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <Badge variant="secondary">{employmentLabel(job.employmentType)}</Badge>
         {job.remote && <Badge variant="success">Remote</Badge>}
+        {salary && (
+          <span className="inline-flex items-center gap-1 font-medium text-green-700">
+            ✓ Pay Disclosed
+          </span>
+        )}
         <span>{timeAgo(job.publishedAt ?? job.createdAt)}</span>
       </div>
     </div>

@@ -36,6 +36,25 @@ export type JobFilters = {
   perPage?: number;
 };
 
+function buildSalaryCondition(minSalary: number) {
+  if (minSalary < 250) {
+    const annualEquiv = minSalary * 2080;
+    return or(
+      and(gte(jobs.salaryMin, minSalary), sql`${jobs.salaryMin} < 250`),
+      and(gte(jobs.salaryMax, minSalary), sql`${jobs.salaryMax} < 250`),
+      gte(jobs.salaryMin, annualEquiv),
+      gte(jobs.salaryMax, annualEquiv)
+    );
+  }
+  const hourlyEquiv = Math.round(minSalary / 2080);
+  return or(
+    gte(jobs.salaryMin, minSalary),
+    gte(jobs.salaryMax, minSalary),
+    and(gte(jobs.salaryMin, hourlyEquiv), sql`${jobs.salaryMin} < 250`),
+    and(gte(jobs.salaryMax, hourlyEquiv), sql`${jobs.salaryMax} < 250`)
+  );
+}
+
 export async function listJobs(filters: JobFilters) {
   const perPage = filters.perPage ?? 15;
   const page = Math.max(1, filters.page ?? 1);
@@ -57,10 +76,7 @@ export async function listJobs(filters: JobFilters) {
   if (filters.type) conds.push(eq(jobs.employmentType, filters.type));
   if (filters.remote) conds.push(eq(jobs.remote, true));
   if (filters.minSalary && filters.minSalary > 0) {
-    const salaryCond = or(
-      gte(jobs.salaryMin, filters.minSalary),
-      gte(jobs.salaryMax, filters.minSalary)
-    );
+    const salaryCond = buildSalaryCondition(filters.minSalary);
     if (salaryCond) conds.push(salaryCond);
   }
 
@@ -88,10 +104,7 @@ export async function countJobs(filters: JobFilters) {
   if (filters.type) conds.push(eq(jobs.employmentType, filters.type));
   if (filters.remote) conds.push(eq(jobs.remote, true));
   if (filters.minSalary && filters.minSalary > 0) {
-    const salaryCond = or(
-      gte(jobs.salaryMin, filters.minSalary),
-      gte(jobs.salaryMax, filters.minSalary)
-    );
+    const salaryCond = buildSalaryCondition(filters.minSalary);
     if (salaryCond) conds.push(salaryCond);
   }
 

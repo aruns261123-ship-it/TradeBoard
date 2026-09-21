@@ -34,38 +34,59 @@ export function employmentLabel(value: string) {
   return EMPLOYMENT_TYPES.find((e) => e.value === value)?.label ?? "Full-time";
 }
 
-// Top 30 states by trade employment — enough for programmatic SEO pages
+// Complete 50 US States + District of Columbia
 export const STATES = [
-  { code: "TX", name: "Texas" },
-  { code: "CA", name: "California" },
-  { code: "FL", name: "Florida" },
-  { code: "NY", name: "New York" },
-  { code: "PA", name: "Pennsylvania" },
-  { code: "IL", name: "Illinois" },
-  { code: "OH", name: "Ohio" },
-  { code: "GA", name: "Georgia" },
-  { code: "NC", name: "North Carolina" },
-  { code: "MI", name: "Michigan" },
-  { code: "AZ", name: "Arizona" },
-  { code: "CO", name: "Colorado" },
-  { code: "WA", name: "Washington" },
-  { code: "MA", name: "Massachusetts" },
-  { code: "TN", name: "Tennessee" },
-  { code: "IN", name: "Indiana" },
-  { code: "MO", name: "Missouri" },
-  { code: "WI", name: "Wisconsin" },
-  { code: "VA", name: "Virginia" },
-  { code: "NJ", name: "New Jersey" },
-  { code: "SC", name: "South Carolina" },
   { code: "AL", name: "Alabama" },
-  { code: "LA", name: "Louisiana" },
-  { code: "KY", name: "Kentucky" },
-  { code: "OR", name: "Oregon" },
-  { code: "OK", name: "Oklahoma" },
-  { code: "UT", name: "Utah" },
-  { code: "NV", name: "Nevada" },
-  { code: "MN", name: "Minnesota" },
+  { code: "AK", name: "Alaska" },
+  { code: "AZ", name: "Arizona" },
+  { code: "AR", name: "Arkansas" },
+  { code: "CA", name: "California" },
+  { code: "CO", name: "Colorado" },
+  { code: "CT", name: "Connecticut" },
+  { code: "DE", name: "Delaware" },
+  { code: "DC", name: "District of Columbia" },
+  { code: "FL", name: "Florida" },
+  { code: "GA", name: "Georgia" },
+  { code: "HI", name: "Hawaii" },
+  { code: "ID", name: "Idaho" },
+  { code: "IL", name: "Illinois" },
+  { code: "IN", name: "Indiana" },
+  { code: "IA", name: "Iowa" },
   { code: "KS", name: "Kansas" },
+  { code: "KY", name: "Kentucky" },
+  { code: "LA", name: "Louisiana" },
+  { code: "ME", name: "Maine" },
+  { code: "MD", name: "Maryland" },
+  { code: "MA", name: "Massachusetts" },
+  { code: "MI", name: "Michigan" },
+  { code: "MN", name: "Minnesota" },
+  { code: "MS", name: "Mississippi" },
+  { code: "MO", name: "Missouri" },
+  { code: "MT", name: "Montana" },
+  { code: "NE", name: "Nebraska" },
+  { code: "NV", name: "Nevada" },
+  { code: "NH", name: "New Hampshire" },
+  { code: "NJ", name: "New Jersey" },
+  { code: "NM", name: "New Mexico" },
+  { code: "NY", name: "New York" },
+  { code: "NC", name: "North Carolina" },
+  { code: "ND", name: "North Dakota" },
+  { code: "OH", name: "Ohio" },
+  { code: "OK", name: "Oklahoma" },
+  { code: "OR", name: "Oregon" },
+  { code: "PA", name: "Pennsylvania" },
+  { code: "RI", name: "Rhode Island" },
+  { code: "SC", name: "South Carolina" },
+  { code: "SD", name: "South Dakota" },
+  { code: "TN", name: "Tennessee" },
+  { code: "TX", name: "Texas" },
+  { code: "UT", name: "Utah" },
+  { code: "VT", name: "Vermont" },
+  { code: "VA", name: "Virginia" },
+  { code: "WA", name: "Washington" },
+  { code: "WV", name: "West Virginia" },
+  { code: "WI", name: "Wisconsin" },
+  { code: "WY", name: "Wyoming" },
 ] as const;
 
 export function stateByCode(code: string) {
@@ -74,4 +95,55 @@ export function stateByCode(code: string) {
 
 export function stateName(code: string) {
   return stateByCode(code)?.name ?? code;
+}
+
+export const PAY_TRANSPARENCY_STATES = ["CA", "CO", "NY", "WA", "CT", "MD", "NV", "RI", "HI"] as const;
+
+export type TradePerk = {
+  id: string;
+  label: string;
+  emoji: string;
+};
+
+/**
+ * Extracts recognized American skilled-trade perks, certifications, and benefits
+ * from job descriptions to display as highlights for job seekers.
+ */
+export function extractTradePerks(text?: string | null): TradePerk[] {
+  if (!text) return [];
+  const lower = text.toLowerCase();
+  const perks: TradePerk[] = [];
+
+  if (/\b(truck|van|company vehicle|take-home|take home)\b/.test(lower)) {
+    perks.push({ id: "truck", label: "Take-Home Truck", emoji: "🚐" });
+  }
+  if (/\b(401k|401\(k\)|retirement)\b/.test(lower)) {
+    perks.push({ id: "401k", label: "401(k) Match", emoji: "💰" });
+  }
+  if (/\b(health|dental|vision|medical insurance)\b/.test(lower)) {
+    perks.push({ id: "health", label: "Health / Dental", emoji: "🏥" });
+  }
+  if (/\b(sign-on|sign on|signing bonus)\b/.test(lower)) {
+    perks.push({ id: "bonus", label: "Sign-on Bonus", emoji: "🎁" });
+  }
+  if (/\b(tool allowance|boot allowance|tools provided)\b/.test(lower)) {
+    perks.push({ id: "tools", label: "Tool Allowance", emoji: "🧰" });
+  }
+  if (/\b(overtime|time and a half|1\.5x)\b/.test(lower)) {
+    perks.push({ id: "overtime", label: "Overtime Available", emoji: "⏱️" });
+  }
+  if (/\b(epa 608|epa universal)\b/.test(lower)) {
+    perks.push({ id: "epa", label: "EPA 608", emoji: "📜" });
+  }
+  if (/\b(journeyman|master plumber|master electrician)\b/.test(lower)) {
+    perks.push({ id: "license", label: "Licensed Tech", emoji: "⚡" });
+  }
+  if (/\b(veteran|military|helmets to hardhats)\b/.test(lower)) {
+    perks.push({ id: "veteran", label: "Veteran Friendly", emoji: "🎖️" });
+  }
+  if (/\b(pto|paid time off|paid holidays|vacation)\b/.test(lower)) {
+    perks.push({ id: "pto", label: "Paid Time Off", emoji: "🌴" });
+  }
+
+  return perks.slice(0, 4);
 }

@@ -42,6 +42,11 @@ export function formatPrice(cents: number) {
 
 export function formatSalary(min?: number | null, max?: number | null) {
   if (!min && !max) return null;
+  const isHourly = Boolean((min && min < 250) || (max && max < 250));
+  if (isHourly) {
+    if (min && max) return min === max ? `$${min}/hr` : `$${min} – $${max}/hr`;
+    return `$${min ?? max}+/hr`;
+  }
   const fmt = (n: number) => `$${Math.round(n / 1000)}k`;
   if (min && max) return min === max ? `${fmt(min)}/yr` : `${fmt(min)} – ${fmt(max)}/yr`;
   return `${fmt((min ?? max)!)}+/yr`;

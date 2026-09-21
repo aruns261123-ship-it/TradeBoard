@@ -17,11 +17,12 @@ export const metadata: Metadata = {
 type SP = Promise<Record<string, string | string[] | undefined>>;
 
 const SALARY_OPTIONS = [
-  { label: "Any salary", value: "" },
-  { label: "$40,000+ / year", value: "40000" },
-  { label: "$50,000+ / year", value: "50000" },
+  { label: "Any pay rate", value: "" },
+  { label: "$25+/hr (or $52k+/yr)", value: "25" },
+  { label: "$35+/hr (or $73k+/yr)", value: "35" },
+  { label: "$45+/hr (or $94k+/yr)", value: "45" },
   { label: "$60,000+ / year", value: "60000" },
-  { label: "$75,000+ / year", value: "75000" },
+  { label: "$80,000+ / year", value: "80000" },
   { label: "$100,000+ / year", value: "100000" },
   { label: "$120,000+ / year", value: "120000" },
 ];

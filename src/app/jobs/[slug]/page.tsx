@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { ApplyForm } from "@/app/jobs/[slug]/apply-form";
 import { getJobBySlug, getRelatedJobs, incrementJobViews } from "@/lib/data";
-import { employmentLabel, tradeBySlug } from "@/lib/trades";
+import { employmentLabel, tradeBySlug, extractTradePerks } from "@/lib/trades";
 import { formatSalary } from "@/lib/pricing";
 import { timeAgo } from "@/lib/utils";
 import { escapeJsonLdObject } from "@/lib/sanitize";
@@ -43,6 +43,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   await incrementJobViews(job.id);
 
   const salary = formatSalary(job.salaryMin, job.salaryMax);
+  const perks = extractTradePerks(job.description);
   const daysLeft = job.expiresAt
     ? Math.max(0, Math.ceil((job.expiresAt.getTime() - Date.now()) / 86400000))
     : 0;
@@ -83,10 +84,32 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           <Badge variant="secondary">{employmentLabel(job.employmentType)}</Badge>
           {job.remote && <Badge variant="success">Remote</Badge>}
           {job.featured && <Badge variant="warning">★ Featured</Badge>}
+          {salary && (
+            <Badge variant="outline" className="border-green-600/40 bg-green-50/60 text-green-700">
+              ✓ Pay Disclosed
+            </Badge>
+          )}
           <span className="text-sm text-muted-foreground">
             Posted {timeAgo(job.publishedAt ?? job.createdAt)} · {daysLeft} days left
           </span>
         </div>
+
+        {perks.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Highlights & Perks:
+            </span>
+            {perks.map((p) => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-foreground"
+              >
+                <span>{p.emoji}</span>
+                <span>{p.label}</span>
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           <ShareButtons

@@ -34,18 +34,48 @@ const EMPTY: JobDraft = {
   remote: false,
 };
 
+const US_DISCLAIMERS = [
+  "Take-Home Company Vehicle & Gas Card provided",
+  "401(k) with company match & full Health/Dental/Vision",
+  "Tool & Boot Allowance provided annually",
+  "Sign-on bonus available for experienced technicians",
+  "Equal Opportunity Employer (EOE) · Drug-Free Workplace",
+  "Clean driving record (MVR) & background check required",
+  "Must be authorized to work in the United States",
+  "Veteran & military transition friendly employer",
+];
+
 export function JobForm() {
   const router = useRouter();
   const [draft, setDraft] = useState<JobDraft>(EMPTY);
+  const [payType, setPayType] = useState<"hourly" | "yearly">("hourly");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("jobDraft");
-    if (saved) setDraft({ ...EMPTY, ...JSON.parse(saved) });
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setDraft({ ...EMPTY, ...parsed });
+      if (parsed.salaryMin && Number(parsed.salaryMin) >= 250) {
+        setPayType("yearly");
+      }
+    }
   }, []);
 
   function set<K extends keyof JobDraft>(key: K, value: JobDraft[K]) {
     setDraft((d) => ({ ...d, [key]: value }));
+  }
+
+  function addDisclaimer(bullet: string) {
+    setDraft((d) => {
+      const existing = d.description.trim();
+      const addition = `• ${bullet}`;
+      if (existing.includes(bullet)) return d;
+      return {
+        ...d,
+        description: existing ? `${existing}\n\n${addition}` : addition,
+      };
+    });
   }
 
   function next() {
@@ -86,59 +116,92 @@ export function JobForm() {
           <Input id="jf-city" value={draft.city} onChange={(e) => set("city", e.target.value)} placeholder="Dallas" />
         </div>
         <div>
-          <Label htmlFor="jf-state">State *</Label>
+          <Label htmlFor="jf-state">State * (All 50 US States + DC)</Label>
           <Select id="jf-state" value={draft.state} onChange={(e) => set("state", e.target.value)}>
             <option value="">Select state…</option>
             {STATES.map((s) => (
               <option key={s.code} value={s.code}>
-                {s.name}
+                {s.name} ({s.code})
               </option>
             ))}
           </Select>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div>
-          <Label htmlFor="jf-type">Employment type</Label>
-          <Select
-            id="jf-type"
-            value={draft.employmentType}
-            onChange={(e) => set("employmentType", e.target.value)}
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </Select>
+      <div className="rounded-lg border bg-secondary/30 p-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label className="font-semibold text-foreground">Compensation / Pay Rate</Label>
+          <div className="flex items-center rounded-md border bg-card p-0.5 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => setPayType("hourly")}
+              className={`rounded px-2.5 py-1 transition-colors ${
+                payType === "hourly" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Hourly ($/hr)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPayType("yearly")}
+              className={`rounded px-2.5 py-1 transition-colors ${
+                payType === "yearly" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Yearly ($/yr)
+            </button>
+          </div>
         </div>
-        <div>
-          <Label htmlFor="jf-min">Salary min (USD/yr)</Label>
-          <Input
-            id="jf-min"
-            type="number"
-            min={0}
-            value={draft.salaryMin}
-            onChange={(e) => set("salaryMin", e.target.value)}
-            placeholder="55000"
-          />
-        </div>
-        <div>
-          <Label htmlFor="jf-max">Salary max (USD/yr)</Label>
-          <Input
-            id="jf-max"
-            type="number"
-            min={0}
-            value={draft.salaryMax}
-            onChange={(e) => set("salaryMax", e.target.value)}
-            placeholder="85000"
-          />
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="jf-type">Employment type</Label>
+            <Select
+              id="jf-type"
+              value={draft.employmentType}
+              onChange={(e) => set("employmentType", e.target.value)}
+            >
+              {EMPLOYMENT_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="jf-min">
+              {payType === "hourly" ? "Min pay ($/hr)" : "Min salary ($/yr)"}
+            </Label>
+            <Input
+              id="jf-min"
+              type="number"
+              min={0}
+              value={draft.salaryMin}
+              onChange={(e) => set("salaryMin", e.target.value)}
+              placeholder={payType === "hourly" ? "32" : "65000"}
+            />
+          </div>
+          <div>
+            <Label htmlFor="jf-max">
+              {payType === "hourly" ? "Max pay ($/hr)" : "Max salary ($/yr)"}
+            </Label>
+            <Input
+              id="jf-max"
+              type="number"
+              min={0}
+              value={draft.salaryMax}
+              onChange={(e) => set("salaryMax", e.target.value)}
+              placeholder={payType === "hourly" ? "48" : "95000"}
+            />
+          </div>
         </div>
       </div>
 
       <div>
-        <Label htmlFor="jf-desc">Job description *</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="jf-desc">Job description *</Label>
+          <span className="text-xs text-muted-foreground">Tip: mention licenses (EPA 608, Journeyman, CDL)</span>
+        </div>
         <Textarea
           id="jf-desc"
           className="min-h-[220px]"
@@ -146,14 +209,27 @@ export function JobForm() {
           onChange={(e) => set("description", e.target.value)}
           placeholder={"What you'll do…\n\nWhat we're looking for…\n\nPay & benefits…"}
         />
-        <p className="mt-1 text-xs text-muted-foreground">
-          Plain text with blank lines between sections works best.
-        </p>
+
+        <div className="mt-2">
+          <p className="text-xs font-semibold text-muted-foreground">Add common US trade benefits & disclaimers (click to insert):</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {US_DISCLAIMERS.map((disc) => (
+              <button
+                key={disc}
+                type="button"
+                onClick={() => addDisclaimer(disc)}
+                className="rounded-md border border-input bg-card px-2 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-accent"
+              >
+                + {disc}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <Label htmlFor="jf-apply-email">Apply email (applications come here)</Label>
+          <Label htmlFor="jf-apply-email">Apply email (applications arrive here)</Label>
           <Input
             id="jf-apply-email"
             type="email"
