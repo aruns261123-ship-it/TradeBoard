@@ -18,6 +18,7 @@ export function ContactForm() {
         name: form.get("name"),
         email: form.get("email"),
         message: form.get("message"),
+        website: form.get("website") || undefined,
       }),
     });
     setStatus(res.ok ? "done" : "error");

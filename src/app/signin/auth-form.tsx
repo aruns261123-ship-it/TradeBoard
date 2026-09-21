@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+  const rawCallback = params.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl =
+    rawCallback.startsWith("/") && !rawCallback.startsWith("//") ? rawCallback : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 

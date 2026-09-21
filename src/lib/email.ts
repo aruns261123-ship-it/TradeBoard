@@ -19,21 +19,25 @@ export async function sendEmail(opts: {
   subject: string;
   html: string;
 }) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
+  const key = process.env.RESEND_API_KEY?.trim();
+  if (!key || key.includes("...") || key === "re_test") {
     console.log(
       `[email:dev] To: ${opts.to} | Subject: ${opts.subject}\n${opts.html.replace(/<[^>]*>/g, " ").slice(0, 300)}`
     );
     return;
   }
-  const { Resend } = await import("resend");
-  const resend = new Resend(key);
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "TradeBoard <onboarding@resend.dev>",
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-  });
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(key);
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM ?? "TradeBoard <onboarding@resend.dev>",
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    });
+  } catch (err) {
+    console.error("[email:error]", err instanceof Error ? err.message : err);
+  }
 }
 
 export function receiptEmail(product: ProductKey, info: CustomerInfo) {

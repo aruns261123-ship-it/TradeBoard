@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { JobCard } from "@/components/job-card";
 import { listJobs, countJobs, safeQuery } from "@/lib/data";
 import { TRADES, STATES, employmentLabel } from "@/lib/trades";
-import { APP_NAME } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +31,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SP }) {
     page: Number(get("page") ?? "1") || 1,
   };
 
-  const [{ items, hasMore, page, perPage }, total] = await Promise.all([
+  const [{ items, hasMore, page }, total] = await Promise.all([
     safeQuery("jobs:listJobs", () => listJobs(filters), {
       items: [],
       hasMore: false,

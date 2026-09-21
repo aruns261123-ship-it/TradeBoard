@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { ApplyForm } from "@/app/jobs/[slug]/apply-form";
 import { getJobBySlug, getRelatedJobs, incrementJobViews } from "@/lib/data";
-import { employmentLabel } from "@/lib/trades";
+import { employmentLabel, tradeBySlug } from "@/lib/trades";
 import { formatSalary } from "@/lib/pricing";
 import { timeAgo } from "@/lib/utils";
 import { escapeJsonLdObject } from "@/lib/sanitize";
@@ -13,7 +13,7 @@ import { APP_NAME, appUrl, absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const row = await getJobBySlug(slug);
   if (!row) return { title: "Job not found" };
@@ -53,7 +53,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         <Link href="/jobs" className="hover:text-foreground">Jobs</Link>
         {" / "}
         <Link href={`/${job.trade}-jobs`} className="hover:text-foreground">
-          {job.trade.toUpperCase()} jobs
+          {tradeBySlug(job.trade)?.plural ?? `${job.trade} jobs`}
         </Link>
       </nav>
 
@@ -111,7 +111,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       {related.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xl font-bold tracking-tight">
-            More {job.trade.toUpperCase()} jobs
+            More {tradeBySlug(job.trade)?.plural ?? `${job.trade} jobs`}
           </h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {related.map((r) => (

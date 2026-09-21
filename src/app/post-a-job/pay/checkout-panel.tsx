@@ -170,13 +170,18 @@ export function CheckoutPanel({
 
           {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
-          <Button size="lg" className="w-full" onClick={publish} disabled={status === "loading"}>
-            {status === "loading"
-              ? "Processing…"
-              : agencyActive || credits > 0
-                ? "Publish now (covered by your plan)"
-                : `Pay ${formatPrice(price)} & publish`}
-          </Button>
+          {(() => {
+            const isCovered = agencyActive || (credits > 0 && product === "standard");
+            return (
+              <Button size="lg" className="w-full" onClick={publish} disabled={status === "loading"}>
+                {status === "loading"
+                  ? "Processing…"
+                  : isCovered
+                    ? "Publish now (covered by your plan)"
+                    : `Pay ${formatPrice(price)} & publish`}
+              </Button>
+            );
+          })()}
           <p className="text-center text-xs text-muted-foreground">
             Secure payment via Stripe. Your job goes live immediately after payment.
           </p>

@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { orders } from "@/db/schema";
 import { getStripe } from "@/lib/stripe";
 import { fulfillOrder } from "@/lib/fulfillment";
 

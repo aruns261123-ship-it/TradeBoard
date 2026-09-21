@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { jobs, orders } from "@/db/schema";
+import { orders } from "@/db/schema";
 import { auth } from "@/auth";
 import { getOrCreateCompanyForUser } from "@/lib/auth-helpers";
 import { hasActiveAgencyPlan, getPostCredits, findPromoCode, redeemPromoCode } from "@/lib/entitlements";

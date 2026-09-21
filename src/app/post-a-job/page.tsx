@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { JobForm } from "@/app/post-a-job/job-form";
-import { auth } from "@/auth";
 
 export const metadata: Metadata = { title: "Post a Job" };
 export const dynamic = "force-dynamic";

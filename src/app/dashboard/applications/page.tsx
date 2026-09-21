@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { applications, companies, jobs } from "@/db/schema";
+import { applications, jobs } from "@/db/schema";
 import { auth } from "@/auth";
 import { getOrCreateCompanyForUser } from "@/lib/auth-helpers";
 import { Badge } from "@/components/ui/badge";

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,15 +20,34 @@ export function JobActions({
 
   async function act(action: "fill" | "reopen" | "extend" | "delete") {
     setBusy(true);
-    await fetch(`/api/jobs/${jobId}/${action}`, { method: "POST" });
-    setBusy(false);
-    router.refresh();
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error ?? "Failed to update job");
+      }
+    } catch {
+      alert("Network error updating job");
+    } finally {
+      setBusy(false);
+      router.refresh();
+    }
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {status === "published" && (
         <>
+          <Link
+            href={`/jobs/${slug}`}
+            className="inline-flex h-8 items-center rounded-md border border-input bg-card px-3 text-xs font-semibold hover:bg-accent"
+          >
+            View
+          </Link>
           <Button variant="outline" size="sm" disabled={busy} onClick={() => act("fill")}>
             Mark filled
           </Button>

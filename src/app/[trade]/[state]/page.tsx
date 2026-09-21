@@ -16,11 +16,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { trade, state } = await params;
   const t = tradeFromSegment(trade);
-  const stateNamePretty = state
-    .split("-")
-    .map((w) => w[0]?.toUpperCase() + w.slice(1))
-    .join(" ");
-  if (!t) return { title: "Not found" };
+  const stateSlugToCode = new Map(
+    STATES.map((s) => [s.name.toLowerCase().replace(/\s+/g, "-"), s.code])
+  );
+  const code = stateSlugToCode.get(state);
+  if (!t || !code) return { title: "Not found" };
+  const stateNamePretty = stateName(code);
   return {
     title: `${t.plural} in ${stateNamePretty}`,
     description: `${t.plural} in ${stateNamePretty} from licensed contractors. Filter by city, salary, and type — updated daily on ${APP_NAME}.`,

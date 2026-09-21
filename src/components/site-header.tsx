@@ -33,6 +33,14 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2">
           {session?.user ? (
             <>
+              {session.user.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="inline-flex h-9 items-center rounded-md border border-primary/30 bg-primary/10 px-3 text-sm font-semibold text-primary hover:bg-primary/20"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 className="inline-flex h-9 items-center rounded-md border border-input bg-card px-4 text-sm font-semibold hover:bg-accent"
