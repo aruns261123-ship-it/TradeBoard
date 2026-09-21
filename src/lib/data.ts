@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { companies, jobs } from "@/db/schema";
 import type { TradeSlug } from "@/lib/trades";
@@ -30,6 +30,8 @@ export type JobFilters = {
   trade?: string;
   state?: string;
   type?: string;
+  remote?: boolean;
+  minSalary?: number;
   page?: number;
   perPage?: number;
 };
@@ -53,6 +55,14 @@ export async function listJobs(filters: JobFilters) {
   if (filters.trade) conds.push(eq(jobs.trade, filters.trade as TradeSlug));
   if (filters.state) conds.push(eq(jobs.state, filters.state.toUpperCase()));
   if (filters.type) conds.push(eq(jobs.employmentType, filters.type));
+  if (filters.remote) conds.push(eq(jobs.remote, true));
+  if (filters.minSalary && filters.minSalary > 0) {
+    const salaryCond = or(
+      gte(jobs.salaryMin, filters.minSalary),
+      gte(jobs.salaryMax, filters.minSalary)
+    );
+    if (salaryCond) conds.push(salaryCond);
+  }
 
   const where = and(...conds);
 
@@ -75,11 +85,79 @@ export async function countJobs(filters: JobFilters) {
   const conds = [eq(jobs.status, "published" as const), gt(jobs.expiresAt, new Date())];
   if (filters.trade) conds.push(eq(jobs.trade, filters.trade as TradeSlug));
   if (filters.state) conds.push(eq(jobs.state, filters.state.toUpperCase()));
+  if (filters.type) conds.push(eq(jobs.employmentType, filters.type));
+  if (filters.remote) conds.push(eq(jobs.remote, true));
+  if (filters.minSalary && filters.minSalary > 0) {
+    const salaryCond = or(
+      gte(jobs.salaryMin, filters.minSalary),
+      gte(jobs.salaryMax, filters.minSalary)
+    );
+    if (salaryCond) conds.push(salaryCond);
+  }
+
+  if (filters.q) {
+    const like = `%${filters.q}%`;
+    const cond = or(
+      ilike(jobs.title, like),
+      ilike(jobs.description, like),
+      ilike(companies.name, like),
+      ilike(jobs.city, like)
+    );
+    if (cond) conds.push(cond);
+
+    const [row] = await db
+      .select({ n: count() })
+      .from(jobs)
+      .innerJoin(companies, eq(jobs.companyId, companies.id))
+      .where(and(...conds));
+    return row?.n ?? 0;
+  }
+
   const [row] = await db
     .select({ n: count() })
     .from(jobs)
     .where(and(...conds));
   return row?.n ?? 0;
+}
+
+export async function getJobsByIds(ids: number[]) {
+  if (!ids.length) return [];
+  const rows = await db
+    .select({ job: jobs, company: companies })
+    .from(jobs)
+    .innerJoin(companies, eq(jobs.companyId, companies.id))
+    .where(
+      and(
+        inArray(jobs.id, ids),
+        eq(jobs.status, "published"),
+        gt(jobs.expiresAt, new Date())
+      )
+    );
+  return rows;
+}
+
+export async function getCompanyWithJobs(companyId: number) {
+  const [company] = await db
+    .select()
+    .from(companies)
+    .where(eq(companies.id, companyId))
+    .limit(1);
+
+  if (!company) return null;
+
+  const jobRows = await db
+    .select()
+    .from(jobs)
+    .where(
+      and(
+        eq(jobs.companyId, companyId),
+        eq(jobs.status, "published"),
+        gt(jobs.expiresAt, new Date())
+      )
+    )
+    .orderBy(desc(jobs.featured), desc(jobs.publishedAt));
+
+  return { company, jobs: jobRows };
 }
 
 export async function countLiveByTrade() {

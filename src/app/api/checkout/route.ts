@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
   });
 
   let existingJob: typeof jobs.$inferSelect | null = null;
+  const isUpgrade = body?.action === "upgrade_featured";
+
   if (existingJobId) {
     const [found] = await db
       .select()
@@ -42,14 +44,22 @@ export async function POST(req: NextRequest) {
     if (!found) {
       return NextResponse.json({ error: "Job not found." }, { status: 404 });
     }
-    if (found.status !== "pending_payment" && found.status !== "draft") {
+    if (isUpgrade) {
+      if (found.status !== "published") {
+        return NextResponse.json({ error: "Only published jobs can be upgraded." }, { status: 400 });
+      }
+      if (found.featured) {
+        return NextResponse.json({ error: "This job is already featured." }, { status: 400 });
+      }
+    } else if (found.status !== "pending_payment" && found.status !== "draft") {
       return NextResponse.json({ error: "This job is not awaiting payment." }, { status: 400 });
     }
     existingJob = found;
   }
 
-  const productKey: string =
-    body?.product ?? (existingJob ? (existingJob.featured ? "featured" : "standard") : "standard");
+  const productKey: string = isUpgrade
+    ? "featured"
+    : body?.product ?? (existingJob ? (existingJob.featured ? "featured" : "standard") : "standard");
   if (!isProductKey(productKey)) {
     return NextResponse.json({ error: "Invalid product selected." }, { status: 400 });
   }
@@ -129,10 +139,12 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Paid paths ---
-  const amountCents = Math.round(
-    PRODUCTS[isPack ? "pack5" : isAgency ? "agency" : product].priceCents *
-      (1 - promoPercentOff / 100)
-  );
+  const amountCents = isUpgrade
+    ? 9900
+    : Math.round(
+        PRODUCTS[isPack ? "pack5" : isAgency ? "agency" : product].priceCents *
+          (1 - promoPercentOff / 100)
+      );
 
   const [order] = await db
     .insert(orders)
@@ -174,8 +186,10 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: PRODUCTS[product].name,
-              description: PRODUCTS[product].description,
+              name: isUpgrade ? "Featured Job Upgrade" : PRODUCTS[product].name,
+              description: isUpgrade
+                ? "Upgrade live job posting to Featured status"
+                : PRODUCTS[product].description,
             },
             unit_amount: amountCents,
           },

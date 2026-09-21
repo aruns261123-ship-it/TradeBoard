@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { jobs, companies, applications } from "@/db/schema";
+import { jobs, companies, applications, users } from "@/db/schema";
 import { sendEmail, applicationEmail } from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -62,9 +62,19 @@ export async function POST(
     resumeUrl: d.resumeUrl || null,
   });
 
-  if (row.job.applyEmail) {
+  let targetEmail = row.job.applyEmail;
+  if (!targetEmail && row.company.userId) {
+    const [user] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, row.company.userId))
+      .limit(1);
+    targetEmail = user?.email ?? null;
+  }
+
+  if (targetEmail) {
     const mail = applicationEmail({
-      employerEmail: row.job.applyEmail,
+      employerEmail: targetEmail,
       jobTitle: row.job.title,
       applicantName: d.name,
       applicantEmail: d.email,
@@ -72,7 +82,7 @@ export async function POST(
       message: d.message,
       resumeUrl: d.resumeUrl,
     });
-    await sendEmail({ to: row.job.applyEmail, subject: mail.subject, html: mail.html });
+    await sendEmail({ to: targetEmail, subject: mail.subject, html: mail.html });
   }
 
   return NextResponse.json({ ok: true });

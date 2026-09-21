@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { SignOutButton } from "@/app/dashboard/job-actions";
+import { SavedJobsNav } from "@/components/saved-jobs-counter";
 
 export async function SiteHeader() {
   // Missing AUTH_SECRET or an auth outage must not crash every page.
@@ -22,6 +23,7 @@ export async function SiteHeader() {
           <Link href="/jobs" className="hover:text-foreground">
             Browse Jobs
           </Link>
+          <SavedJobsNav />
           <Link href="/for-employers" className="hover:text-foreground">
             For Employers
           </Link>

@@ -48,6 +48,37 @@ export function JobActions({
     }
   }
 
+  async function handleUpgradeFeatured() {
+    if (!confirm("Upgrade this job to Featured? It will be highlighted and pinned to the top of all listings for $99.")) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, action: "upgrade_featured" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(data.error || "Failed to process upgrade.");
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      if (data.devMode) {
+        alert("🎉 Job successfully upgraded to Featured!");
+        router.refresh();
+      }
+    } catch {
+      alert("Network error upgrading job.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
@@ -86,6 +117,17 @@ export function JobActions({
             >
               Edit
             </Link>
+            {!featured && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={busy}
+                onClick={handleUpgradeFeatured}
+                className="border-amber-500/50 bg-amber-50/60 text-amber-800 hover:bg-amber-100"
+              >
+                ⭐ Feature ($99)
+              </Button>
+            )}
             <Button variant="outline" size="sm" disabled={busy} onClick={() => act("fill")}>
               Mark filled
             </Button>

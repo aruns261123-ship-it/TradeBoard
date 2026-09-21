@@ -58,12 +58,20 @@ export default async function AdminPage() {
     <div className="container py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-extrabold tracking-tight">Admin</h1>
-        <Link
-          href="/admin/leads"
-          className="inline-flex h-10 items-center rounded-md border border-input bg-card px-4 text-sm font-semibold hover:bg-accent"
-        >
-          Employer leads →
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/jobs"
+            className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90"
+          >
+            Moderate jobs →
+          </Link>
+          <Link
+            href="/admin/leads"
+            className="inline-flex h-10 items-center rounded-md border border-input bg-card px-4 text-sm font-semibold hover:bg-accent"
+          >
+            Employer leads →
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">

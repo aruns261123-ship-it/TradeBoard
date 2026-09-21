@@ -9,6 +9,7 @@ import { formatSalary } from "@/lib/pricing";
 import { timeAgo } from "@/lib/utils";
 import { escapeJsonLdObject } from "@/lib/sanitize";
 import { ShareButtons } from "@/components/share-buttons";
+import { SaveJobButton } from "@/components/save-job-button";
 import { APP_NAME, appUrl, absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">{job.title}</h1>
             <p className="mt-2 text-lg text-muted-foreground">
-              {company.name} · {job.city}, {job.state}
+              <Link
+                href={`/companies/${company.id}`}
+                className="font-semibold text-foreground hover:text-primary hover:underline"
+              >
+                {company.name}
+              </Link>{" "}
+              · {job.city}, {job.state}
             </p>
           </div>
           {salary && (
@@ -81,11 +88,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           </span>
         </div>
 
-        <div className="mt-5 border-t pt-4">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
           <ShareButtons
             url={absoluteUrl(`/jobs/${job.slug}`)}
             title={`${job.title} at ${company.name}`}
           />
+          <SaveJobButton jobId={job.id} showText={true} className="border px-3 py-1.5" />
         </div>
 
         <div className="prose prose-sm mt-6 max-w-none whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">

@@ -24,6 +24,9 @@ export async function fulfillOrder(session: StripeNs.Checkout.Session) {
     .where(eq(orders.id, orderId));
 
   if (order.jobId) {
+    if (order.product === "featured") {
+      await db.update(jobs).set({ featured: true }).where(eq(jobs.id, order.jobId));
+    }
     await db.update(jobs).set({ status: "paid" }).where(eq(jobs.id, order.jobId));
     await publishJob(order.jobId);
   }
