@@ -66,8 +66,8 @@ export async function POST(
         .where(eq(jobs.id, jobId));
       break;
     case "delete":
-      if (job.status !== "draft" && job.status !== "expired") {
-        return NextResponse.json({ error: "Only drafts or expired posts can be deleted" }, { status: 400 });
+      if (job.status !== "draft" && job.status !== "expired" && job.status !== "pending_payment") {
+        return NextResponse.json({ error: "Only drafts, pending payment, or expired posts can be deleted" }, { status: 400 });
       }
       await db.delete(jobs).where(eq(jobs.id, jobId));
       break;

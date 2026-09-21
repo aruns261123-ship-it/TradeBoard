@@ -115,6 +115,7 @@ export const applications = pgTable(
     phone: text("phone"),
     message: text("message"),
     resumeUrl: text("resume_url"),
+    status: text("status").notNull().default("new"), // new | reviewed | contacted | hired | rejected
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [index("applications_job_idx").on(t.jobId)]

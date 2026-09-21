@@ -139,9 +139,13 @@ export default async function DashboardPage({
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link href={`/jobs/${job.slug}`} className="font-semibold hover:text-primary">
-                    {job.title}
-                  </Link>
+                  {job.status === "published" ? (
+                    <Link href={`/jobs/${job.slug}`} className="font-semibold hover:text-primary">
+                      {job.title}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold">{job.title}</span>
+                  )}
                   <Badge variant={STATUS_VARIANT[job.status] ?? "secondary"}>
                     {job.status.replace("_", " ")}
                   </Badge>
@@ -156,7 +160,15 @@ export default async function DashboardPage({
                     : ""}
                 </p>
               </div>
-              <JobActions jobId={job.id} status={job.status} slug={job.slug} />
+              <JobActions
+                jobId={job.id}
+                status={job.status}
+                slug={job.slug}
+                title={job.title}
+                featured={job.featured}
+                credits={credits}
+                agencyActive={agency}
+              />
             </div>
           ))
         )}
