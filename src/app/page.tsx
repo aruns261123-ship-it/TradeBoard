@@ -4,6 +4,10 @@ import { Input, Select } from "@/components/ui/inputs";
 import { JobCard } from "@/components/job-card";
 import { TRADES, STATES } from "@/lib/trades";
 import { countLiveByTrade, listJobs, safeQuery } from "@/lib/data";
+import { BLOG_POSTS } from "@/lib/blog-data";
+import { Badge } from "@/components/ui/badge";
+import { escapeJsonLdObject } from "@/lib/sanitize";
+import { APP_NAME } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +123,99 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Career Guides & Pay Reports */}
+      <section className="container py-14">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Trade Career Guides &amp; Pay Reports
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Practical licensing guides, compensation benchmarks, and apprenticeship playbooks.
+            </p>
+          </div>
+          <Link href="/blog" className="text-sm font-semibold text-primary hover:underline">
+            View all guides →
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
+          {BLOG_POSTS.slice(0, 3).map((post) => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group flex flex-col justify-between rounded-xl border bg-card p-5 shadow-sm transition hover:border-primary/50 hover:shadow-md"
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{post.category}</Badge>
+                  <span className="text-xs text-muted-foreground">{post.readingTime}</span>
+                </div>
+                <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground transition group-hover:text-primary">
+                  {post.title}
+                </h3>
+                <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              </div>
+              <div className="mt-4 border-t pt-3 text-xs font-semibold text-primary group-hover:underline">
+                Read Guide →
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Frequently Asked Questions */}
+      <section className="border-t bg-secondary/30 py-14">
+        <div className="container max-w-4xl">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight">
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Everything you need to know about finding work or hiring in the skilled trades.
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            {[
+              {
+                question: "What is TradeBoard?",
+                answer: `${APP_NAME} is the dedicated job board and career platform for the skilled trades. We connect licensed HVAC technicians, electricians, plumbers, welders, machinists, and carpenters directly with verified contractors across all 50 US states.`,
+              },
+              {
+                question: "How do job seekers apply for trade jobs?",
+                answer:
+                  "Job seekers can search by trade, state, hourly wage, or remote status and apply in 60 seconds with their contact info, trade certifications, and optional resume. No account creation required for seekers.",
+              },
+              {
+                question: "How much do skilled trades pay in the United States?",
+                answer:
+                  "Starting apprentice wages typically range from $20 to $27 per hour. Licensed journeymen in electrical, plumbing, and commercial HVAC/R average between $36 and $55 per hour ($75,000 to $115,000 annually), with master technicians and specialty welders exceeding $125,000+ with overtime and per diem.",
+              },
+              {
+                question: "Are trade apprenticeships paid while learning?",
+                answer:
+                  "Yes. Unlike 4-year colleges that accumulate student debt, accredited skilled-trade apprenticeships are 100% paid from day one. Apprentices earn a full-time wage with structured 5%–10% raises every 6 to 12 months as they log field hours and pass classroom modules.",
+              },
+              {
+                question: "How do contractors post a job on TradeBoard?",
+                answer:
+                  "Employers can post a job in under 3 minutes. Listings include instant multi-channel distribution, highlighted trade perks (like take-home truck, tool allowance, 401k match), applicant tracking, and direct email delivery of candidate profiles.",
+              },
+            ].map((faq, idx) => (
+              <div key={idx} className="rounded-xl border bg-card p-6 shadow-sm">
+                <h3 className="text-base font-bold text-foreground">{faq.question}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {faq.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Employer CTA */}
       <section className="container py-14">
         <div className="rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-8 text-center shadow-sm md:p-12">
@@ -145,6 +242,59 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Homepage FAQPage structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: escapeJsonLdObject({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "What is TradeBoard?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: `${APP_NAME} is the dedicated job board and career platform for the skilled trades. We connect licensed HVAC technicians, electricians, plumbers, welders, machinists, and carpenters directly with verified contractors across all 50 US states.`,
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How do job seekers apply for trade jobs?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Job seekers can search by trade, state, hourly wage, or remote status and apply in 60 seconds with their contact info, trade certifications, and optional resume. No account creation required for seekers.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How much do skilled trades pay in the United States?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Starting apprentice wages typically range from $20 to $27 per hour. Licensed journeymen in electrical, plumbing, and commercial HVAC/R average between $36 and $55 per hour ($75,000 to $115,000 annually), with master technicians and specialty welders exceeding $125,000+ with overtime and per diem.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Are trade apprenticeships paid while learning?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes. Unlike 4-year colleges that accumulate student debt, accredited skilled-trade apprenticeships are 100% paid from day one. Apprentices earn a full-time wage with structured 5%–10% raises every 6 to 12 months as they log field hours and pass classroom modules.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How do contractors post a job on TradeBoard?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Employers can post a job in under 3 minutes. Listings include instant multi-channel distribution, highlighted trade perks (like take-home truck, tool allowance, 401k match), applicant tracking, and direct email delivery of candidate profiles.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </>
   );
 }

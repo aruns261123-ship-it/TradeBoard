@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JobCard } from "@/components/job-card";
 import { SubscribeForm } from "@/components/subscribe-form";
-import { tradeFromSegment, STATES } from "@/lib/trades";
+import { tradeFromSegment, STATES, getTradeFaqs } from "@/lib/trades";
 import { countLiveByTrade, countLiveByState, listJobs, safeQuery } from "@/lib/data";
 import { APP_NAME, appUrl } from "@/lib/seo";
 import { escapeJsonLdObject } from "@/lib/sanitize";
+import { getBlogPostsByTrade } from "@/lib/blog-data";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -102,6 +104,72 @@ export default async function TradeHubPage({
         )}
       </section>
 
+      {/* Trade Career Guides */}
+      {(() => {
+        const tradeGuides = getBlogPostsByTrade(t.slug, 2);
+        if (tradeGuides.length === 0) return null;
+        return (
+          <section className="mt-12">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold tracking-tight">
+                {t.name} Career Guides &amp; Licensing Roadmaps
+              </h2>
+              <Link href="/blog" className="text-sm font-semibold text-primary hover:underline">
+                All guides →
+              </Link>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {tradeGuides.map((guide) => (
+                <Link
+                  key={guide.slug}
+                  href={`/blog/${guide.slug}`}
+                  className="group rounded-xl border bg-card p-5 shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{guide.category}</Badge>
+                    <span className="text-xs text-muted-foreground">{guide.readingTime}</span>
+                  </div>
+                  <h3 className="mt-2 text-base font-bold text-foreground group-hover:text-primary">
+                    {guide.title}
+                  </h3>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                    {guide.excerpt}
+                  </p>
+                  <span className="mt-3 inline-block text-xs font-semibold text-primary group-hover:underline">
+                    Read Guide →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* Trade FAQs */}
+      {(() => {
+        const faqs = getTradeFaqs(t.slug);
+        if (faqs.length === 0) return null;
+        return (
+          <section className="mt-12 rounded-xl border bg-card p-6 shadow-sm md:p-8">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+              Frequently Asked Questions: {t.name} Careers
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Key insights on licensing, certifications, and compensation for {t.name.toLowerCase()} professionals.
+            </p>
+
+            <div className="mt-6 space-y-4">
+              {faqs.map((faq, idx) => (
+                <div key={idx} className="rounded-lg border bg-muted/20 p-5">
+                  <h3 className="text-base font-bold text-foreground">{faq.question}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
       {/* SEO copy */}
       <section className="mt-12 max-w-3xl rounded-xl border bg-card p-6 text-sm leading-relaxed text-muted-foreground">
         <h2 className="text-base font-bold text-foreground">
@@ -120,6 +188,31 @@ export default async function TradeHubPage({
           <SubscribeForm />
         </div>
       </section>
+
+      {/* FAQPage structured data */}
+      {(() => {
+        const faqs = getTradeFaqs(t.slug);
+        if (faqs.length === 0) return null;
+        return (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: escapeJsonLdObject({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: faqs.map((f) => ({
+                  "@type": "Question",
+                  name: f.question,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: f.answer,
+                  },
+                })),
+              }),
+            }}
+          />
+        );
+      })()}
 
       {/* BreadcrumbList structured data */}
       <script

@@ -12,9 +12,42 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
   },
   description: APP_DESCRIPTION,
+  keywords: [
+    "skilled trades jobs",
+    "hvac jobs",
+    "electrician jobs",
+    "plumbing jobs",
+    "welder jobs",
+    "trade apprenticeships",
+    "journeyman electrician salary",
+    "epa 608 certification",
+    "contractor hiring trades",
+  ],
+  authors: [{ name: "TradeBoard Editorial & Workforce Team" }],
+  creator: APP_NAME,
+  publisher: APP_NAME,
   openGraph: {
     siteName: APP_NAME,
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${APP_NAME} — Skilled Trades Jobs: HVAC, Plumbing, Electrical & More`,
+    description: APP_DESCRIPTION,
+    site: "@tradeboard",
+    creator: "@tradeboard",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   alternates: {
     types: {
