@@ -23,6 +23,9 @@ export async function SiteHeader() {
           <Link href="/jobs" className="hover:text-foreground">
             Browse Jobs
           </Link>
+          <Link href="/blog" className="hover:text-foreground">
+            Career Guides
+          </Link>
           <SavedJobsNav />
           <Link href="/for-employers" className="hover:text-foreground">
             For Employers

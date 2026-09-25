@@ -5,7 +5,8 @@ import { JobCard } from "@/components/job-card";
 import { SubscribeForm } from "@/components/subscribe-form";
 import { tradeFromSegment, STATES } from "@/lib/trades";
 import { countLiveByTrade, countLiveByState, listJobs, safeQuery } from "@/lib/data";
-import { APP_NAME } from "@/lib/seo";
+import { APP_NAME, appUrl } from "@/lib/seo";
+import { escapeJsonLdObject } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +120,37 @@ export default async function TradeHubPage({
           <SubscribeForm />
         </div>
       </section>
+
+      {/* BreadcrumbList structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: escapeJsonLdObject({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: appUrl(),
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Jobs",
+                item: `${appUrl()}/jobs`,
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: t.plural,
+                item: `${appUrl()}/${t.slug}-jobs`,
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

@@ -80,6 +80,16 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/blog" className="font-medium text-foreground hover:text-primary">
+                📚 Career Guides &amp; Blog
+              </Link>
+            </li>
+            <li>
+              <Link href="/feed.xml" className="hover:text-foreground">
+                📡 RSS Feed
+              </Link>
+            </li>
+            <li>
               <Link href="/privacy" className="hover:text-foreground">
                 Privacy Policy
               </Link>

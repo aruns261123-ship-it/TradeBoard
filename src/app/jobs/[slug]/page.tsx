@@ -177,6 +177,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
             description: `<p>${job.description.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/\n/g, "</p><p>")}</p>`,
             datePosted: (job.publishedAt ?? job.createdAt).toISOString(),
             validThrough: job.expiresAt?.toISOString(),
+            directApply: true,
             employmentType:
               job.employmentType === "apprenticeship"
                 ? "FULL_TIME"
@@ -195,6 +196,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 addressCountry: "US",
               },
             },
+            ...(job.remote
+              ? {
+                  jobLocationType: "TELECOMMUTE",
+                  applicantLocationRequirements: {
+                    "@type": "Country",
+                    name: "United States",
+                  },
+                }
+              : {}),
             ...(job.salaryMin || job.salaryMax
               ? {
                   baseSalary: {
@@ -204,11 +214,52 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                       "@type": "QuantitativeValue",
                       minValue: job.salaryMin ?? undefined,
                       maxValue: job.salaryMax ?? undefined,
-                      unitText: "YEAR",
+                      unitText:
+                        (job.salaryMin && job.salaryMin < 250) ||
+                        (job.salaryMax && job.salaryMax < 250)
+                          ? "HOUR"
+                          : "YEAR",
                     },
                   },
                 }
               : {}),
+          }),
+        }}
+      />
+
+      {/* BreadcrumbList structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: escapeJsonLdObject({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: appUrl(),
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Jobs",
+                item: absoluteUrl("/jobs"),
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: tradeBySlug(job.trade)?.plural ?? `${job.trade} jobs`,
+                item: absoluteUrl(`/${job.trade}-jobs`),
+              },
+              {
+                "@type": "ListItem",
+                position: 4,
+                name: job.title,
+                item: absoluteUrl(`/jobs/${job.slug}`),
+              },
+            ],
           }),
         }}
       />

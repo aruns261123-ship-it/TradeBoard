@@ -249,3 +249,12 @@ export async function jobsByIds(ids: number[]): Promise<JobWithCompany[]> {
     .innerJoin(companies, eq(jobs.companyId, companies.id))
     .where(inArray(jobs.id, ids));
 }
+
+export async function companyIdsForSitemap(): Promise<number[]> {
+  const rows = await db
+    .selectDistinct({ companyId: jobs.companyId })
+    .from(jobs)
+    .where(eq(jobs.status, "published"));
+  return rows.map((r) => r.companyId);
+}
+
